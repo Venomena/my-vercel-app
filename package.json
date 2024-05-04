@@ -1,0 +1,23 @@
+{
+    "name": "my-vercel-app",
+    "version": "1.0.0",
+    "description": "A serverless Vercel app integrating Groq AI",
+    "main": "index.js",
+    "scripts": {
+      "start": "node index.js",
+      "dev": "vercel dev",
+      "build": "vercel build",
+      "deploy": "vercel --prod"
+    },
+    "engines": {
+      "node": "16.x"
+    },
+    "dependencies": {
+      "express": "^4.18.1",
+      "axios": "^0.27.2",
+      "groq-sdk": "^1.0.0"
+    },
+    "author": "",
+    "license": "ISC"
+  }
+  
