@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Response Visualization</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        #responseOutput { 
+            margin-top: 20px; 
+            padding: 10px; 
+            background-color: #f4f4f4; 
+            border: 1px solid #ddd; 
+            min-height: 50px; 
+        }
+    </style>
+</head>
+<body>
+    <h1>AI Response Visualizer</h1>
+    <form id="aiForm">
+        <input type="text" id="promptInput" placeholder="Enter your prompt">
+        <button type="submit">Submit</button>
+    </form>
+    <div id="responseOutput">AI response will appear here...</div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('aiForm');
+
+            form.addEventListener('submit', async function(event) {
+                event.preventDefault(); // Prevent the form from submitting traditionally
+                const prompt = document.getElementById('promptInput').value;
+
+                try {
+                    const response = await fetch('/api/query', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ prompt }),
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok: ' + response.statusText);
+                    }
+                    const data = await response.json();
+                    document.getElementById('responseOutput').textContent = "AI Response: " + (data.response || "No data received");
+                } catch (error) {
+                    console.error("Error in fetch operation:", error.message);
+                    document.getElementById('responseOutput').textContent = "Error: " + error.message;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
