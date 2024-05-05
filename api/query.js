@@ -4,7 +4,7 @@ const app = express();
 const router = express.Router();
 const port = process.env.PORT || 3000;
 const Groq = require('groq-sdk'); // Or the correct module name
-
+GROQ_API_KEY=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
 
 app.use(bodyParser.json());  // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({  // to support URL-encoded bodies
