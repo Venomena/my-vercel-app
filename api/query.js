@@ -2,19 +2,19 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
 const router = express.Router();
+const fs = require('fs');
+const path = require('path');
+const { exec } = require('child_process');
 const port = process.env.PORT || 3000;
-const Groq = require('groq-sdk'); // Or the correct module name
+const Groq = require('groq-sdk'); // Ensure this is the correct module name
+require('dotenv').config(); // If using dotenv for environment variables
 
-app.use(bodyParser.json());  // to support JSON-encoded bodies
-app.use(bodyParser.urlencoded({  // to support URL-encoded bodies
-  extended: true
-}));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 const groq = new Groq({
     apiKey: process.env.GROQ_API_KEY
 });
-
-router.use(express.json());
 
 router.post('/', async (req, res) => {
     const { prompt } = req.body;
@@ -42,7 +42,7 @@ router.post('/', async (req, res) => {
             fs.writeFileSync(scriptPath, pythonCode);
 
             exec(`python ${scriptPath}`, (error, stdout, stderr) => {
-                fs.unlinkSync(scriptPath);  // Delete the file after running
+                fs.unlinkSync(scriptPath); // Delete the file after running
 
                 if (error) {
                     console.error("Error executing Python script:", stderr);
@@ -61,8 +61,10 @@ router.post('/', async (req, res) => {
     }
 });
 
+app.use('/', router); // Attach the router
+
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
-  });  
+});
 
 module.exports = router;
