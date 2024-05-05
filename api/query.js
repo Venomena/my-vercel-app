@@ -1,70 +1,29 @@
 const express = require('express');
-const bodyParser = require('body-parser');
 const app = express();
-const router = express.Router();
-const fs = require('fs');
-const path = require('path');
-const { exec } = require('child_process');
-const port = process.env.PORT || 3000;
-const Groq = require('groq-sdk'); // Ensure this is the correct module name
-require('dotenv').config(); // If using dotenv for environment variables
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-
-const groq = new Groq({
-    apiKey: process.env.GROQ_API_KEY
+// Example middleware with added logging
+app.use((req, res, next) => {
+    console.log('Middleware 1 called');
+    next();
 });
 
-router.post('/', async (req, res) => {
-    const { prompt } = req.body;
-    console.log("Received prompt:", prompt);
+app.use(express.json());
 
+app.post('/', async (req, res, next) => {
+    console.log('Post route called');
     try {
-        const chatCompletion = await groq.chat.completions.create({
-            messages: [{ role: "user", content: prompt }],
-            model: "mixtral-8x7b-32768"
-        });
-
-        let responseContent = chatCompletion.choices[0]?.message?.content || "No response";
-        console.log("AI Response:", responseContent);
-
-        const codeMatch = responseContent.match(/```python\n([\s\S]*?)\n```/);
-        if (codeMatch) {
-            const pythonCode = codeMatch[1];
-            const scriptsDir = path.join(__dirname, 'scripts');
-            if (!fs.existsSync(scriptsDir)) {
-                fs.mkdirSync(scriptsDir, { recursive: true });
-            }
-            const scriptFileName = `${uuidv4()}.py`;
-            const scriptPath = path.join(scriptsDir, scriptFileName);
-
-            fs.writeFileSync(scriptPath, pythonCode);
-
-            exec(`python ${scriptPath}`, (error, stdout, stderr) => {
-                fs.unlinkSync(scriptPath); // Delete the file after running
-
-                if (error) {
-                    console.error("Error executing Python script:", stderr);
-                    res.status(500).json({ error: "Failed to execute Python script: " + stderr });
-                } else {
-                    console.log("Python Script Execution Result:", stdout);
-                    res.status(200).json({ response: stdout.trim() });
-                }
-            });
-        } else {
-            res.status(200).json({ response: responseContent });
-        }
+        // Your route logic here
+        console.log('Handling POST request for:', req.body);
+        res.status(200).json({ message: 'Success' });
     } catch (error) {
-        console.error("Error in fetching AI response:", error);
-        res.status(500).json({ error: "Failed to fetch AI response: " + error.message });
+        console.error('Error handling POST route:', error);
+        next(error); // Properly pass errors to Express
     }
 });
 
-app.use('/', router); // Attach the router
-
-app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
+app.use((err, req, res, next) => {
+    console.error('Unhandled error:', err);
+    res.status(500).json({ error: 'An unexpected error occurred' });
 });
 
-module.exports = router;
+app.listen(3000, () => console.log('Server running on port 3000'));
